@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, TextField, Grid, Paper, Snackbar } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Menu, MenuItem, Typography, Button, TextField, Grid, Paper, Snackbar, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AccountCircle } from '@mui/icons-material';
 
@@ -9,9 +9,19 @@ function PCodeManagement() {
   const [codeNumber, setCodeNumber] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
+  
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+  
   const handleInsert = async () => {
     try {
       const response = await fetch('http://127.0.0.1:5001/insert_project_code', {
@@ -107,7 +117,9 @@ function PCodeManagement() {
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
-
+  const handleProfileMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
   const handleDashboard = () => {
     navigate('/dashboard');
   };
@@ -126,6 +138,25 @@ function PCodeManagement() {
             </Typography>
             <Button color="inherit" size="small" onClick={handleDashboard}>DASHBOARD</Button>
             <Button color="inherit" size="small" onClick={handlePcodePage}>Pcodes service</Button>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="profile-menu"
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              id="profile-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleProfileMenuClose}
+              onClick={handleProfileMenuClose}
+            >
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
       </Grid>

@@ -75,7 +75,10 @@ export default function EmployeeComponent() {
         if (filter.column === 'Emp Id') {
           // Filter by Employee ID
           filteredData = filteredData.filter(row => row[filter.column] === parseInt(filter.value));
-        } else {
+        } else if (filter.column === 'Allocated') {
+          // Filter by Allocated status
+          filteredData = filteredData.filter(row => row['is_allocated'] === filter.value);
+        }else {
           // Filter by other columns
           filteredData = filteredData.filter(row => row[filter.column] === filter.value);
         }
@@ -114,9 +117,45 @@ export default function EmployeeComponent() {
     navigate('/dashboard');
   };
 
-  const handleManageEmployee = () => {
-    navigate('/manage-employee');
+  const handleManageEmployee = async () => {
+    try {
+      const token = localStorage.getItem('token'); // Retrieve token from local storage
+      if (!token) {
+        // If token is not available, handle accordingly (e.g., redirect to login)
+        console.error('Token not found');
+        return;
+      }
+  
+      // Call the API endpoint for token validation
+      const response = await fetch('http://127.0.0.1:5003/validate_token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token })
+      });
+  
+      if (response.ok) {
+        // Parse the response JSON
+        const data = await response.json();
+        
+        // Check if role is equal to '2'
+        if (data.role === '2') {
+          // Role is '2', navigate to '/manage-employee' route
+          navigate('/manage-employee');
+        } else {
+          // Role is not '2', handle accordingly (e.g., display an error message)
+          console.error('User does not have access to manage employees');
+        }
+      } else {
+        // Token validation failed, handle accordingly (e.g., redirect to login)
+        console.error('Token validation failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
+  
 
   return (
     <div>
@@ -172,6 +211,7 @@ export default function EmployeeComponent() {
                     <TableCell>Project Name</TableCell>
                     <TableCell>Level</TableCell>
                     <TableCell>Portfolio</TableCell>
+                    <TableCell>Allocated</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -183,6 +223,7 @@ export default function EmployeeComponent() {
                         <TableCell>{row['Project name']}</TableCell>
                         <TableCell>{row['level']}</TableCell>
                         <TableCell>{row['portfolio']}</TableCell>
+                        <TableCell>{row['is_allocated']}</TableCell>
                       </TableRow>
                     ))
                   ) : (
@@ -211,6 +252,7 @@ export default function EmployeeComponent() {
                   <MenuItem value="Project name">Project Name</MenuItem>
                   <MenuItem value="level">Level</MenuItem>
                   <MenuItem value="portfolio">Portfolio</MenuItem>
+                  <MenuItem value="Allocated">Allocated</MenuItem>
                 </Select>
                 {filter.column && (
                   <TextField

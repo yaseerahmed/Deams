@@ -115,7 +115,7 @@ const Dashboard = () => {
                 elevation={3}
                 style={{
                   padding: '50px',
-                  backgroundImage: `url(${process.env.PUBLIC_URL}/logo.jpg)`,
+                  backgroundImage: `url(${process.env.PUBLIC_URL}/allocation_image.jpg)`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   height: '300px',

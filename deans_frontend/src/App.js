@@ -1,16 +1,3 @@
-/*import React from 'react';
-import axios from 'axios';
-import EmployeeComponent from './components/EmployeeComponent'; 
-import Login from './components/LoginPage';
-function App() {
-  return (
-    <div className="App">
-      <Login />
-    </div>
-  );
-}*/
-// App.js
-
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -24,6 +11,7 @@ import EmployeeComponent from './components/EmployeeComponent'
 import ProjectCodesComponent from './components/PcodeComponent'
 import EmployeeManagement from './components/ManageEmployeeComponent'
 import PCodeManagement from './components/ManagePcodeComponenet'
+import AllocationManagement from './components/AllocationComponent'
 const App = () => {
   return (
     <Router>
@@ -33,17 +21,20 @@ const App = () => {
       <Routes>
         {/* Route for the Home page */}
         <Route path='/' element={<Login/>} />
-
-        {/* Route for the About page */}
+        {/* Route for the Dashboard page */}
         <Route path='/Dashboard' element={<Dashboard/>} />
-        {/* Route for the About page */}
+        {/* Route for the Employee page */}
         <Route path='/Employee' element={<EmployeeComponent/>} />
-        {/* Route for the About page */}
+        {/* Route for the Projectcode page */}
         <Route path='/pcode' element={<ProjectCodesComponent/>} />
-        {/* Route for the About page */}
+        {/* Route for the Employye management page */}
         <Route path='/manage-employee' element={<EmployeeManagement/>} />
-        {/* Route for the About page */}
+        {/* Route for the Pcode page */}
         <Route path='/manage-pcodes' element={<PCodeManagement/>} />
+        {/* Route for the Allocation management page */}
+        <Route path='/allocation' element={<AllocationManagement/>} />
+        {/* Route test  page */}
+        <Route path='/allocation2' element={<AllocationManagement/>} />
       </Routes>
     </Router>
   );

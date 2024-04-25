@@ -7,7 +7,7 @@ pcode_srvc = Flask(__name__)
 CORS(pcode_srvc)
 # Connect to the database
 def connect_to_db():
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-C5SSQG8\SQLEXPRESS;DATABASE=ResourceAllocationDB;UID=BlueSQLAdmin2024;PWD=Str0ngP@ss#SSMS!')
+    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-C5SSQG8\SQLEXPRESS;DATABASE=ResourceAllocationDB;UID=BlueSQLAdmin2024;PWD=B3tter@w0rk')
     return conn
 
 # Route to retrieve project codes based on project name
@@ -57,6 +57,11 @@ def delete_project_code():
             qry2 = "DELETE FROM t_pcodes WHERE code_number = " + str(code_number) + " and p_code like '" + project_name +"%' ;"
             print(qry2)
             cur.execute(qry2)
+            #conn.commit()
+            # Delete related allocations
+            qry3 = "DELETE FROM allocations WHERE code_number = " + str(code_number) + " and Project_name ='" + project_name +"' ;"
+            print(qry3)
+            cur.execute(qry3)
             conn.commit()
             return jsonify({'message': 'Project code deleted successfully'})
         except Exception as e:

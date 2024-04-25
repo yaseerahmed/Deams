@@ -1,12 +1,12 @@
 from flask import Flask, jsonify, request
 import pyodbc
 import json
-
+from flask_cors import CORS
 alloc_srvc = Flask(__name__)
-
+CORS(alloc_srvc)
 # Connect to the database
 def connect_to_db():
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-C5SSQG8\SQLEXPRESS;DATABASE=ResourceAllocationDB;UID=BlueSQLAdmin2024;PWD=Str0ngP@ss#SSMS!')
+    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-C5SSQG8\SQLEXPRESS;DATABASE=ResourceAllocationDB;UID=BlueSQLAdmin2024;PWD=B3tter@w0rk')
     return conn
 
 import requests
@@ -67,9 +67,11 @@ def get_project_codes():
         pcodes = get_pcodes_details(project_name)
         unavialable_pcodes = []
         unallocated_emps = []
+        #print("update t_pcodes set pending_allocation = 100 where p_code like '" + project_name+"%' ;")
+        cur.execute("update t_pcodes set pending_allocation = 100 where p_code like '" + project_name+"%' ;")
 
-        cur.execute("update t_pcodes set pending_allocation = 100;")
         cur.execute("DELETE FROM allocations WHERE Project_Name = '"+ project_name +"';")
+        cur.execute("update t_"+project_name +"_emp_dtls set is_allocated = 'No' ;")
         
         if employee_details:
             for i in employee_details:
@@ -87,7 +89,7 @@ def get_project_codes():
                         try:
                             cur.execute(qry2)
                             conn.commit()  # Commit the transaction if necessary
-                            print("Insertion successful")
+                            #print("Insertion successful")
                         except Exception as e:
                             conn.rollback()  # Rollback the transaction in case of error
                             print("Error occurred during insertion:", e)
@@ -105,10 +107,10 @@ def get_project_codes():
                 pass
         else:
             print("No pcodes details retrieved.")
-        for i in set(unavialable_pcodes):
-            print(i)
-        for i in unallocated_emps:
-            print(i)
+        #for i in set(unavialable_pcodes):
+        #    print(i)
+        #for i in unallocated_emps:
+        #    print(i)
 
         #project_name = "SKF"
         

@@ -7,7 +7,7 @@ emp_srvc = Flask(__name__)
 CORS(emp_srvc)
 # Connect to the database
 def connect_to_db():
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-C5SSQG8\SQLEXPRESS;DATABASE=ResourceAllocationDB;UID=BlueSQLAdmin2024;PWD=Str0ngP@ss#SSMS!')
+    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-C5SSQG8\SQLEXPRESS;DATABASE=ResourceAllocationDB;UID=BlueSQLAdmin2024;PWD=B3tter@w0rk')
     return conn
 
 # Route to retrieve employee details for a specific project
@@ -29,6 +29,7 @@ SELECT TOP (1000) [Emp_Id]
       ,[Project_Name]
       ,[Portfolio]
       ,[Level]
+      ,[is_allocated]
 FROM [ResourceAllocationDB].[dbo].[{table_name}]
 ORDER BY 
     CASE [Level]
@@ -43,11 +44,11 @@ ORDER BY
     END;
 """
             #query = "SELECT * FROM "+ table_name + " ;"
-            print(query)
+            #print(query)
             cur.execute(query)
             employee_details = cur.fetchall()
             # Convert the result into a dictionary for JSON serialization
-            employee_details_dict = [{'Emp Id': row[0], 'Location': row[1], 'Project name': row[2], 'portfolio': row[3], 'level': row[4]} for row in employee_details]
+            employee_details_dict = [{'Emp Id': row[0], 'Location': row[1], 'Project name': row[2], 'portfolio': row[3], 'level': row[4],'is_allocated':row[5]} for row in employee_details]
             return jsonify(employee_details_dict)
         except Exception as e:
             return jsonify({'error': str(e)})
@@ -169,6 +170,11 @@ def delete_employee():
             # Delete the employee record
             qry2 = "DELETE FROM t_" + project_name + "_emp_dtls WHERE emp_id = " + str(emp_id) + " AND project_name = " + "'" + project_name + "';"
             cur.execute(qry2)
+            #conn.commit()
+            #Delete related allocation as well
+            qry3 = "DELETE FROM allocations where Project_name = '" + project_name +"' and Emp_Id = " + str(emp_id) + ";"
+            print(qry3)
+            cur.execute(qry3)
             conn.commit()
             return jsonify({'message': 'Record deleted successfully'})
         except Exception as e:

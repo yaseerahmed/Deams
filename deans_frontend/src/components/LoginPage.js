@@ -37,7 +37,9 @@ const LoginPage = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Login successful. Token:', data.token); // Print token for debugging
-        localStorage.setItem('token', data.token); // Store token in local storage
+        
+        // Store token in local storage
+        localStorage.setItem('token', data.token);
 
         // Redirect user to dashboard or other page
         // Example: navigate('/dashboard');
