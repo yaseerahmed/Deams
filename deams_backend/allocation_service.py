@@ -163,5 +163,66 @@ def get_allocation_details():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@alloc_srvc.route('/generate_one_allocation', methods=['POST'])
+def generate_one_allocation():
+    #request will have emp id and project name
+    try:
+        print("JSON Input:", request.json)
+        data = request.get_json()
+        project_name = data.get('project_name')
+        emp_id = data.get('emp_id')
+        # Check if project_name is None or empty
+        if not project_name:
+            return jsonify({'error': 'Project name is missing or empty'})
+        if not emp_id:
+            return jsonify({'error': 'Emp id is missing or empty'})
+        conn = connect_to_db()
+        cur = conn.cursor()
+        #check if he is already allocated
+        qry = "SELECT * from allocations where project_name = '"+ project_name + "' and Emp_id = " + str(emp_id) + ";"
+        cur.execute(qry)
+        check_allocation = cur.fetchall()
+        if len(check_allocation) >= 1:
+            return jsonify({'message': 'Associate is already allocated'})
+        #fetch one employee detail
+        qry1 = "SELECT * FROM t_"+project_name+"_emp_dtls WHERE emp_id = " + str(emp_id)+ ";"
+        cur.execute(qry1)
+        employee_details = cur.fetchall()
+        employee_details_dict = [{'Emp Id': row[0], 'Location': row[1], 'Project name': row[2], 'portfolio': row[3], 'level': row[4],'is_allocated':row[5]} for row in employee_details]
+        print(employee_details_dict)
+        if employee_details:
+            for i in employee_details_dict:
+                qry = "SELECT top 1 * from t_pcodes where p_code like '" + project_name + "_" + loc[i['Location']] + "_" + i['portfolio'] + "%' and pending_allocation >= "+ str(alloc_percentage[i['level']]) + ";"
+                cur.execute(qry)
+                project_codes = cur.fetchall()
+                project_codes_list = [{'p_code': row[0], 'location': row[1], 'code_number': row[2], 'start_date': row[3], 'end_date': row[4],'pend_alloc':row[5]} for row in project_codes]
+                
+                if len(project_codes_list) != 0:
+                    for project in project_codes_list:
+                        qry2 = "INSERT into [ResourceAllocationDB].[dbo].[allocations] values(" + str(i['Emp Id']) + " , '" + i['Location'] +  "' , " + str(project['code_number']) + " , '" + project_name + "' , '" + i['level'] + "' , '" + project['p_code'] + "');"
+                        try:
+                            cur.execute(qry2)
+                            #conn.commit()  # Commit the transaction if necessary
+                            #print("Insertion successful")
+                        except Exception as e:
+                            cur.rollback()  # Rollback the transaction in case of error
+                            print("Error occurred during insertion:", e)
+
+                        qry3 = "UPDATE t_pcodes set pending_allocation =" + str(project['pend_alloc'] - alloc_percentage[i['level']]) + " where code_number = " + str(project['code_number'])+ ";"
+                        cur.execute(qry3)
+                        print(qry3)
+                        qry4 = "UPDATE t_" + project_name + "_emp_dtls set is_allocated = 'YES' where Emp_id=" + str(i['Emp Id'])
+                        print(qry4)
+                        cur.execute(qry4)
+                        cur.commit()
+                else:
+                    return jsonify({'message': 'P code unavialble'})
+        
+        
+        return jsonify({'message': 'Allocation generated successfully for one employee'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 if __name__ == '__main__':
     alloc_srvc.run(debug=True, port=5002)

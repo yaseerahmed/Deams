@@ -11,6 +11,7 @@ function AllocationManagement() {
   const [allocationDetails, setAllocationDetails] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [fetchingAllocation, setFetchingAllocation] = useState(false);
+  const [empId, setEmpId] = useState('');
   
   const navigate = useNavigate();
   const handleProfileMenuClose = () => {
@@ -70,8 +71,29 @@ function AllocationManagement() {
       setFetchingAllocation(false);
     }
   };
-  
-  
+  const handleGenerateOneAllocation = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5002/generate_one_allocation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ emp_id: empId, project_name: projectName })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSnackbarMessage(data.message || 'Allocation generated successfully');
+        setSnackbarOpen(true);
+      } else {
+        setSnackbarMessage(data.error || 'An error occurred');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error generating allocation:', error);
+      setSnackbarMessage('An error occurred');
+      setSnackbarOpen(true);
+    }
+  };
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -184,6 +206,37 @@ function AllocationManagement() {
                 </Table>
               </TableContainer>
             </Paper>
+            <Paper elevation={3} sx={{ p: 3 }}>
+      <Typography variant="h5" align="center" gutterBottom>
+        Generate one Allocation
+      </Typography>
+      <TextField
+        label="Project Name"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={projectName}
+        onChange={(e) => setProjectName(e.target.value)}
+      />
+      <TextField
+        label="Employee ID"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={empId}
+        onChange={(e) => setEmpId(e.target.value)}
+      />
+      <Button variant="contained" onClick={handleGenerateOneAllocation} fullWidth>
+        Generate Allocation
+      </Button>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+      />
+    </Paper>
           </Grid>
         </Grid>
       </Grid>
